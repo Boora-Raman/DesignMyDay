@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://13.53.216.29:8085';
+const API_BASE_URL = '/api';
 document.addEventListener('DOMContentLoaded', () => {
     const signupForm = document.getElementById('signup-form');
     const errorContainer = document.getElementById('signup-error');

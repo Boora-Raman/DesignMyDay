@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://13.53.216.29:8085';
+const API_BASE_URL = '/api';
 
 const bookingModal = document.getElementById('booking-modal');
 const closeModal = document.getElementById('close-modal');
