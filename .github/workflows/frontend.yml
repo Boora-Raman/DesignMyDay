@@ -66,7 +66,6 @@ jobs:
             echo "🚀 Starting new frontend container..."
             docker run -d \
               --name "$FRONTEND_CONTAINER_NAME" \
-              --network "$NETWORK_NAME" \
               -p 3000:80 \
               "$IMAGE_NAME:$IMAGE_TAG"
 
