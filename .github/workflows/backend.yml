@@ -11,7 +11,7 @@ env:
   IMAGE_TAG: ${{ github.sha }}
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
-  BACKEND_CONTAINER_NAME: backend_container
+  BACKEND_CONTAINER_NAME: backend
   NETWORK_NAME: app_network
   SSH_HOST: ${{ secrets.SSH_HOST }}
   SSH_USERNAME: ${{ secrets.SSH_USER }}
@@ -52,10 +52,10 @@ jobs:
 
             echo "Stopping and removing previous backend container..."
             docker stop $BACKEND_CONTAINER_NAME || true
-            docker rm $BACKEND_CONTAINER_NAME || true
+            docker rm -f $BACKEND_CONTAINER_NAME || true
 
-            echo "Creating network if not exists..."
-            docker network inspect $NETWORK_NAME >/dev/null 2>&1 || docker network create $NETWORK_NAME
+            # echo "Creating network if not exists..."
+            # docker network inspect $NETWORK_NAME >/dev/null 2>&1 || docker network create $NETWORK_NAME
 
             echo "Starting new backend container..."
             docker run -d \
