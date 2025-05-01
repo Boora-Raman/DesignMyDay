@@ -7,7 +7,7 @@ WORKDIR /build
 # Copy all project files into the container
 COPY . .
 
-# Build the application using Maven
+# Build the application using Maven 
 RUN mvn clean install
 
 # Use a smaller image for running the app
