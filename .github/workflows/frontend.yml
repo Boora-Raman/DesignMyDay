@@ -32,8 +32,8 @@ jobs:
         run: |
           IMAGE_NAME=${{ env.DOCKERHUB_USERNAME }}/frontenddmd
           cd Frontend
-          docker build -t $IMAGE_NAME:${{ env.IMAGE_TAG }} .
-          docker push $IMAGE_NAME:${{ env.IMAGE_TAG }}
+          docker build -t "$IMAGE_NAME:${{ env.IMAGE_TAG }}" .
+          docker push "$IMAGE_NAME:${{ env.IMAGE_TAG }}"
 
       - name: Deploy to Remote Server via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -51,24 +51,25 @@ jobs:
             echo "Pulling frontend image..."
             docker pull "$IMAGE_NAME:$IMAGE_TAG"
 
-            if [ "$(docker ps -a -q -f name="^${FRONTEND_CONTAINER_NAME}$")" ]; then
-            
-              echo "Stopping and removing old container..."
+            echo "Checking for existing container '$FRONTEND_CONTAINER_NAME'..."
+            container_exists=$(docker ps -a --format '{{.Names}}' | grep -w "$FRONTEND_CONTAINER_NAME" || true)
+
+            if [ -n "$container_exists" ]; then
+              echo "Stopping and removing old frontend container..."
               docker stop "$FRONTEND_CONTAINER_NAME" || true
               docker rm -f "$FRONTEND_CONTAINER_NAME" || true
             else
-              echo "No existing container named '$CONTAINER_NAME'. Skipping removal."
+              echo "No existing container named '$FRONTEND_CONTAINER_NAME'."
             fi
-            
 
-            # echo "Creating Docker network if not exists..."
-            # docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
+            echo "Ensuring Docker network '$NETWORK_NAME' exists..."
+            docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
 
             echo "Starting new frontend container..."
             docker run -d \
-              --name "$CONTAINER_NAME" \
+              --name "$FRONTEND_CONTAINER_NAME" \
               --network "$NETWORK_NAME" \
               -p 3000:80 \
               "$IMAGE_NAME:$IMAGE_TAG"
 
-            echo "✅ Deployment command sent. Exiting."
+            echo "✅ Frontend container deployed successfully."
