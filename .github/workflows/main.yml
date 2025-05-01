@@ -68,6 +68,6 @@ jobs:
             docker run -d \
               --name $FRONTEND_CONTAINER_NAME \
               --network $NETWORK_NAME \
-              -p 3000:3000 \
+              -p 3000:80 \
               $FRONTEND_IMAGE_NAME:${IMAGE_TAG}
 ```
