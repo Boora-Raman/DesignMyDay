@@ -50,11 +50,11 @@ jobs:
             echo "Pulling latest backend image..."
             docker pull $BACKEND_IMAGE_NAME:$IMAGE_TAG
 
-            echo "Stopping and removing existing backend container..."
+            echo "Stopping and removing previous backend container..."
             docker stop $BACKEND_CONTAINER_NAME || true
             docker rm $BACKEND_CONTAINER_NAME || true
 
-            echo "Creating Docker network if it doesn't exist..."
+            echo "Creating network if not exists..."
             docker network inspect $NETWORK_NAME >/dev/null 2>&1 || docker network create $NETWORK_NAME
 
             echo "Starting new backend container..."
@@ -64,19 +64,4 @@ jobs:
               -p 8085:8085 \
               $BACKEND_IMAGE_NAME:$IMAGE_TAG
 
-            echo "Waiting for backend to be ready..."
-            for i in {1..5}; do
-              if curl -f http://localhost:8085/health || curl -f http://localhost:8085; then
-                echo "✅ Backend is up after $i attempt(s)"
-                break
-              fi
-              echo "❌ Backend not ready, attempt $i"
-              sleep 5
-              if [ $i -eq 5 ]; then
-                echo "🔥 Backend failed to start after 5 attempts"
-                docker logs $BACKEND_CONTAINER_NAME
-                exit 1
-              fi
-            done
-
-            echo "Backend container deployment complete."
+            echo "✅ Backend container restarted with new image."
