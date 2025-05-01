@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -31,15 +32,15 @@ public class ImageController {
     public ResponseEntity<Resource> serveImage(@PathVariable String fileName) {
         logger.info("Serving image: {}", fileName);
         try {
-            Path filePath = Paths.get(fileStorageConfig.getVenueUploadDir()).resolve(fileName).normalize();
+            Path filePath = Paths.get(fileStorageConfig.getVenueUploadDir())
+                    .resolve(fileName)
+                    .normalize();
             Resource resource = new UrlResource(filePath.toUri());
 
             if (resource.exists() && resource.isReadable()) {
-                String contentType = "image/jpeg";
-                if (fileName.endsWith(".png")) {
-                    contentType = "image/png";
-                } else if (fileName.endsWith(".gif")) {
-                    contentType = "image/gif";
+                String contentType = Files.probeContentType(filePath);
+                if (contentType == null) {
+                    contentType = "application/octet-stream"; // fallback
                 }
 
                 return ResponseEntity.ok()
@@ -48,7 +49,9 @@ public class ImageController {
                         .body(resource);
             } else {
                 logger.warn("Image '{}' not found or not readable", fileName);
-                Path defaultPath = Paths.get(fileStorageConfig.getVenueUploadDir()).resolve("default.jpg").normalize();
+                Path defaultPath = Paths.get(fileStorageConfig.getVenueUploadDir())
+                        .resolve("default.jpg")
+                        .normalize();
                 Resource defaultResource = new UrlResource(defaultPath.toUri());
                 if (defaultResource.exists() && defaultResource.isReadable()) {
                     return ResponseEntity.ok()
