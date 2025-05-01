@@ -12,7 +12,6 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
   BACKEND_CONTAINER_NAME: backend_container
-  FRONTEND_CONTAINER_NAME: frontend_container
   NETWORK_NAME: app_network
   SSH_HOST: ${{ secrets.SSH_HOST }}
   SSH_USERNAME: ${{ secrets.SSH_USER }}
@@ -45,23 +44,20 @@ jobs:
           script: |
             IMAGE_TAG="${{ env.IMAGE_TAG }}"
             BACKEND_IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/backenddmd"
-            FRONTEND_IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/frontenddmd"
             BACKEND_CONTAINER_NAME="${{ env.BACKEND_CONTAINER_NAME }}"
-            FRONTEND_CONTAINER_NAME="${{ env.FRONTEND_CONTAINER_NAME }}"
             NETWORK_NAME="${{ env.NETWORK_NAME }}"
 
-            echo "Pulling latest Docker images..."
+            echo "Pulling latest backend image..."
             docker pull $BACKEND_IMAGE_NAME:$IMAGE_TAG
-            docker pull $FRONTEND_IMAGE_NAME:$IMAGE_TAG || true
 
-            echo "Stopping and removing existing containers..."
-            docker stop $BACKEND_CONTAINER_NAME || true && docker rm $BACKEND_CONTAINER_NAME || true
-            docker stop $FRONTEND_CONTAINER_NAME || true && docker rm $FRONTEND_CONTAINER_NAME || true
+            echo "Stopping and removing existing backend container..."
+            docker stop $BACKEND_CONTAINER_NAME || true
+            docker rm $BACKEND_CONTAINER_NAME || true
 
-            echo "Creating network if not exists..."
+            echo "Creating Docker network if it doesn't exist..."
             docker network inspect $NETWORK_NAME >/dev/null 2>&1 || docker network create $NETWORK_NAME
 
-            echo "Starting backend container..."
+            echo "Starting new backend container..."
             docker run -d \
               --name $BACKEND_CONTAINER_NAME \
               --network $NETWORK_NAME \
@@ -71,34 +67,16 @@ jobs:
             echo "Waiting for backend to be ready..."
             for i in {1..5}; do
               if curl -f http://localhost:8085/health || curl -f http://localhost:8085; then
-                echo "Backend is up after $i attempt(s)"
+                echo "✅ Backend is up after $i attempt(s)"
                 break
               fi
-              echo "Backend not ready, attempt $i"
+              echo "❌ Backend not ready, attempt $i"
               sleep 5
               if [ $i -eq 5 ]; then
-                echo "Backend failed to start after 5 attempts"
+                echo "🔥 Backend failed to start after 5 attempts"
                 docker logs $BACKEND_CONTAINER_NAME
                 exit 1
               fi
             done
 
-            echo "Starting frontend container..."
-            docker run -d \
-              --name $FRONTEND_CONTAINER_NAME \
-              --network $NETWORK_NAME \
-              -p 3000:80 \
-              $FRONTEND_IMAGE_NAME:$IMAGE_TAG
-
-            echo "Waiting briefly for frontend to start..."
-            sleep 5
-
-            echo "Checking running containers..."
-            if docker ps | grep $BACKEND_CONTAINER_NAME && docker ps | grep $FRONTEND_CONTAINER_NAME; then
-              echo "✅ Both containers are running."
-            else
-              echo "❌ One or both containers failed to start."
-              docker logs $BACKEND_CONTAINER_NAME || true
-              docker logs $FRONTEND_CONTAINER_NAME || true
-              exit 1
-            fi
+            echo "Backend container deployment complete."
