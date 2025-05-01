@@ -9,8 +9,8 @@ on:
 
 env:
   IMAGE_TAG: ${{ github.sha }}
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   CONTAINER_NAME: frontend_container
   NETWORK_NAME: app_network
   SSH_HOST: ${{ secrets.SSH_HOST }}
