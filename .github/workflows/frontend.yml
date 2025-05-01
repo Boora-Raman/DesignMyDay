@@ -42,11 +42,11 @@ jobs:
           username: ${{ env.SSH_USERNAME }}
           key: ${{ env.SSH_KEY }}
           script: |
-            IMAGE_TAG="${{ env.IMAGE_TAG }}"
-            DOCKERHUB_USERNAME="${{ env.DOCKERHUB_USERNAME }}"
-            CONTAINER_NAME="${{ env.FRONTEND_CONTAINER_NAME }}"
+            IMAGE_TAG="${IMAGE_TAG}"
+            DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME}"
+            FRONTEND_CONTAINER_NAME="${FRONTEND_CONTAINER_NAME}"
             IMAGE_NAME="${DOCKERHUB_USERNAME}/frontenddmd"
-            NETWORK_NAME="${{ env.NETWORK_NAME }}"
+            NETWORK_NAME="${NETWORK_NAME}"
 
             echo "Pulling frontend image..."
             docker pull "$IMAGE_NAME:$IMAGE_TAG"
