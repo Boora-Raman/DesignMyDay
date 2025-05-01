@@ -67,6 +67,8 @@ jobs:
             docker run -d \
               --name "$BACKEND_CONTAINER_NAME" \
               -p 8085:8085 \
+              -v /home/admin/designmyday/uploads:/uploads \
               "$BACKEND_IMAGE_NAME:$IMAGE_TAG"
+
 
             echo "✅ Backend container restarted with new image."
