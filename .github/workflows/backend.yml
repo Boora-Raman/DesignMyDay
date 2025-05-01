@@ -49,11 +49,13 @@ jobs:
 
             echo "Pulling latest backend image..."
             docker pull $BACKEND_IMAGE_NAME:$IMAGE_TAG
-
-            echo "Stopping and removing previous backend container..."
-            docker stop $BACKEND_CONTAINER_NAME || true
-            docker rm -f $BACKEND_CONTAINER_NAME || true
-
+            if [ "$(docker ps -a -q -f name="^${CONTAINER_NAME}$")" ]; then
+              echo "Stopping and removing previous backend container..."
+              docker stop $BACKEND_CONTAINER_NAME || true
+              docker rm -f $BACKEND_CONTAINER_NAME || true
+            else
+              echo "No Container Present"
+            fi
             # echo "Creating network if not exists..."
             # docker network inspect $NETWORK_NAME >/dev/null 2>&1 || docker network create $NETWORK_NAME
 
