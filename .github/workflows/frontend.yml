@@ -9,13 +9,13 @@ on:
 
 env:
   IMAGE_TAG: ${{ github.sha }}
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}  # Fixed to match screenshot
+  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}  # Fixed to match screenshot
   CONTAINER_NAME: frontend_container
   NETWORK_NAME: app_network
   SSH_HOST: ${{ secrets.SSH_HOST }}
-  SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-  SSH_KEY: ${{ secrets.SSH_KEY }}
+  SSH_USERNAME: ${{ secrets.SSH_USER }}  # Fixed to match SSH_USER in screenshot
+  SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Fixed to match SSH_PRIVATE_KEY in screenshot
 
 jobs:
   build-and-deploy:
