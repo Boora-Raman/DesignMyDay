@@ -1,0 +1,55 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '/frontend/**'
+
+env:
+  IMAGE_TAG: ${{ github.sha }}
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  CONTAINER_NAME: frontend_container
+  NETWORK_NAME: app_network
+  SSH_HOST: ${{ secrets.SSH_HOST }}
+  SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+  SSH_KEY: ${{ secrets.SSH_KEY }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+
+      - name: Build and Push Frontend Docker Image
+        run: |
+          IMAGE_NAME=${DOCKER_USERNAME}/frontend-designmyday/frontenddmd
+          cd frontend
+          docker build -t $IMAGE_NAME:${IMAGE_TAG} .
+          docker push $IMAGE_NAME:${IMAGE_TAG}
+
+      - name: Deploy to Remote Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USERNAME }}
+          key: ${{ env.SSH_KEY }}
+          script: |
+            IMAGE_NAME=${DOCKER_USERNAME}/frontend-designmyday/frontenddmd
+            docker pull $IMAGE_NAME:${IMAGE_TAG}
+            
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+
+            docker run -d \
+              --name $CONTAINER_NAME \
+              --network $NETWORK_NAME \
+              -p 3000:80 \
+              $IMAGE_NAME:${IMAGE_TAG}
