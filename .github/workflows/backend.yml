@@ -48,22 +48,27 @@ jobs:
             NETWORK_NAME="${{ env.NETWORK_NAME }}"
 
             echo "Pulling latest backend image..."
-            docker pull $BACKEND_IMAGE_NAME:$IMAGE_TAG
-            if [ "$(docker ps -a -q -f name="^${BACKEND_CONTAINER_NAME}$")" ]; then
+            docker pull "$BACKEND_IMAGE_NAME:$IMAGE_TAG"
+
+            echo "Checking if backend container '$BACKEND_CONTAINER_NAME' exists..."
+            container_exists=$(docker ps -a --format '{{.Names}}' | grep -w "$BACKEND_CONTAINER_NAME" || true)
+
+            if [ -n "$container_exists" ]; then
               echo "Stopping and removing previous backend container..."
               docker stop "$BACKEND_CONTAINER_NAME"
               docker rm -f "$BACKEND_CONTAINER_NAME"
             else
-              echo "No Container Present"
+              echo "No container named '$BACKEND_CONTAINER_NAME' found."
             fi
-            # echo "Creating network if not exists..."
-            # docker network inspect $NETWORK_NAME >/dev/null 2>&1 || docker network create $NETWORK_NAME
+
+            echo "Ensuring Docker network '$NETWORK_NAME' exists..."
+            docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
 
             echo "Starting new backend container..."
             docker run -d \
-              --name $BACKEND_CONTAINER_NAME \
-              --network $NETWORK_NAME \
+              --name "$BACKEND_CONTAINER_NAME" \
+              --network "$NETWORK_NAME" \
               -p 8085:8085 \
-              $BACKEND_IMAGE_NAME:$IMAGE_TAG
+              "$BACKEND_IMAGE_NAME:$IMAGE_TAG"
 
             echo "✅ Backend container restarted with new image."
