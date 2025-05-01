@@ -51,8 +51,8 @@ jobs:
             docker pull $BACKEND_IMAGE_NAME:$IMAGE_TAG
             if [ "$(docker ps -a -q -f name="^${BACKEND_CONTAINER_NAME}$")" ]; then
               echo "Stopping and removing previous backend container..."
-              docker stop $BACKEND_CONTAINER_NAME
-              docker rm -f $BACKEND_CONTAINER_NAME
+              docker stop $(BACKEND_CONTAINER_NAME)
+              docker rm -f $(BACKEND_CONTAINER_NAME)
             else
               echo "No Container Present"
             fi
