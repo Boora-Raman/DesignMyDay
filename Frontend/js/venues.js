@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const token = sessionStorage.getItem('jwt');
             if (!token) throw new Error('You must be logged in to view venues.');
             const decoded = decodeJWT(token);
-            if (!decoded?.sub) throw new Error('Invalid token: user ID not found.');
+            // if (!decoded?.sub) throw new Error('Invalid token: user ID not found.');
             const response = await axios.get(`${API_BASE_URL}/venues${query ? `?name=${encodeURIComponent(query)}` : ''}`, {
                 // headers: { Authorization: `Bearer ${token}` },
             });
