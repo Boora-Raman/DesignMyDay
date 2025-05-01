@@ -22,54 +22,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: 📦 Checkout Code
         uses: actions/checkout@v3
 
-      - name: Log in to Docker Hub
+      - name: 🔐 Log in to Docker Hub
         run: echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build and Push Frontend Docker Image
+      - name: 🛠️ Build and Push Frontend Docker Image
         run: |
           IMAGE_NAME=${{ env.DOCKERHUB_USERNAME }}/frontenddmd
           cd Frontend
           docker build -t "$IMAGE_NAME:${{ env.IMAGE_TAG }}" .
           docker push "$IMAGE_NAME:${{ env.IMAGE_TAG }}"
 
-      - name: Deploy to Remote Server via SSH
+      - name: 🚀 Deploy to Remote Server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USERNAME }}
           key: ${{ env.SSH_KEY }}
           script: |
-            IMAGE_TAG="${IMAGE_TAG}"
-            DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME}"
-            FRONTEND_CONTAINER_NAME="${FRONTEND_CONTAINER_NAME}"
+            IMAGE_TAG="${{ env.IMAGE_TAG }}"
+            DOCKERHUB_USERNAME="${{ env.DOCKERHUB_USERNAME }}"
+            FRONTEND_CONTAINER_NAME="${{ env.FRONTEND_CONTAINER_NAME }}"
             IMAGE_NAME="${DOCKERHUB_USERNAME}/frontenddmd"
-            NETWORK_NAME="${NETWORK_NAME}"
+            NETWORK_NAME="${{ env.NETWORK_NAME }}"
 
-            echo "Pulling frontend image..."
+            echo "📥 Pulling latest frontend image..."
             docker pull "$IMAGE_NAME:$IMAGE_TAG"
 
-            echo "Checking for existing container '$FRONTEND_CONTAINER_NAME'..."
-            container_exists=$(docker ps -a --format '{{.Names}}' | grep -w "$FRONTEND_CONTAINER_NAME" || true)
-
-            if [ -n "$container_exists" ]; then
-              echo "Stopping and removing old frontend container..."
+            echo "🔍 Checking if container '$FRONTEND_CONTAINER_NAME' exists..."
+            if docker ps -a --format '{{.Names}}' | grep -w "$FRONTEND_CONTAINER_NAME" >/dev/null 2>&1; then
+              echo "🛑 Stopping and removing existing container..."
               docker stop "$FRONTEND_CONTAINER_NAME" || true
               docker rm -f "$FRONTEND_CONTAINER_NAME" || true
             else
-              echo "No existing container named '$FRONTEND_CONTAINER_NAME'."
+              echo "✅ No existing container named '$FRONTEND_CONTAINER_NAME'."
             fi
 
-            echo "Ensuring Docker network '$NETWORK_NAME' exists..."
+            echo "🔗 Ensuring Docker network '$NETWORK_NAME' exists..."
             docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
 
-            echo "Starting new frontend container..."
+            echo "🚀 Starting new frontend container..."
             docker run -d \
               --name "$FRONTEND_CONTAINER_NAME" \
               --network "$NETWORK_NAME" \
               -p 3000:80 \
               "$IMAGE_NAME:$IMAGE_TAG"
 
-            echo "✅ Frontend container deployed successfully."
+            echo "🎉 Frontend container deployed successfully!"
