@@ -70,19 +70,34 @@ public class WebSecurityConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+
+
+
+     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Match all endpoints
-                        .allowedOrigins("http://localhost:3000", "http://127.0.0.1:3001","http://127.0.0.1:5500") // Specify frontend origins
+                        .allowedOrigins("http://localhost:3000", "http://127.0.0.1:3001","http://127.0.0.1:5500" , "http://127.0.0.1:3000","http://13.53.163.51:3000")  // Specify frontend origins
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow specific HTTP methods
                         .allowedHeaders("*") // Allow all headers
                         .allowCredentials(true);
             }
         };
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
