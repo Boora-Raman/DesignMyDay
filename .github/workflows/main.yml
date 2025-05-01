@@ -1,0 +1,73 @@
+```yaml
+name: Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Development/Backend/**'
+
+env:
+  IMAGE_TAG: ${{ github.sha }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKERHUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  BACKEND_CONTAINER_NAME: backend_container
+  FRONTEND_CONTAINER_NAME: frontend_container
+  NETWORK_NAME: app_network
+  SSH_HOST: ${{ secrets.SSH_HOST }}
+  SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+  SSH_KEY: ${{ secrets.SSH_KEY }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+      - name: Build and Push Backend Docker Image
+        run: |
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/backend-designmyday/backenddmd
+          cd Backend
+          docker build -t $IMAGE_NAME:${IMAGE_TAG} .
+          docker push $IMAGE_NAME:${IMAGE_TAG}
+
+      - name: Deploy to Remote Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USERNAME }}
+          key: ${{ env.SSH_KEY }}
+          script: |
+            BACKEND_IMAGE_NAME=${DOCKERHUB_USERNAME}/backend-designmyday/backenddmd
+            FRONTEND_IMAGE_NAME=${DOCKERHUB_USERNAME}/frontend-designmyday/frontenddmd
+            
+            # Pull the latest backend image
+            docker pull $BACKEND_IMAGE_NAME:${IMAGE_TAG}
+            
+            # Pull the latest frontend image (ensure it's available)
+            docker pull $FRONTEND_IMAGE_NAME:${IMAGE_TAG} || true
+
+            # Stop and remove all containers
+            docker ps -aq | xargs -r docker stop || true
+            docker ps -aq | xargs -r docker rm || true
+
+            # Run the backend container
+            docker run -d \
+              --name $BACKEND_CONTAINER_NAME \
+              --network $NETWORK_NAME \
+              -p 8085:8085 \
+              $BACKEND_IMAGE_NAME:${IMAGE_TAG}
+
+            # Run the frontend container
+            docker run -d \
+              --name $FRONTEND_CONTAINER_NAME \
+              --network $NETWORK_NAME \
+              -p 3000:3000 \
+              $FRONTEND_IMAGE_NAME:${IMAGE_TAG}
+```
