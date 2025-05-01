@@ -65,7 +65,7 @@ jobs:
             echo "🚀 Starting new frontend container..."
             docker run -d \
               --name "$FRONTEND_CONTAINER_NAME" \
-              -p 3000:80 \
+              -p 80:80 \
               "$IMAGE_NAME:$IMAGE_TAG"
 
             echo "🎉 Frontend container deployed successfully!"
