@@ -15,6 +15,7 @@ env:
   SSH_HOST: ${{ secrets.SSH_HOST }}
   SSH_USERNAME: ${{ secrets.SSH_USER }}
   SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  NETWORK_NAME: backend-network  # 👈 Add a default fallback network name
 
 jobs:
   build-and-deploy:
@@ -41,6 +42,9 @@ jobs:
           username: ${{ env.SSH_USERNAME }}
           key: ${{ env.SSH_KEY }}
           script: |
+            set -e  # 🔒 Exit on first failure
+            echo "Deploying Backend..."
+
             IMAGE_TAG="${{ env.IMAGE_TAG }}"
             BACKEND_IMAGE_NAME="${{ env.DOCKERHUB_USERNAME }}/backenddmd"
             BACKEND_CONTAINER_NAME="${{ env.BACKEND_CONTAINER_NAME }}"
@@ -50,25 +54,23 @@ jobs:
             docker pull "$BACKEND_IMAGE_NAME:$IMAGE_TAG"
 
             echo "Checking if backend container '$BACKEND_CONTAINER_NAME' exists..."
-            container_exists=$(docker ps -a --format '{{.Names}}' | grep -w "$BACKEND_CONTAINER_NAME" || true)
-
-            if [ -n "$container_exists" ]; then
-              echo "Stopping and removing previous backend container..."
+            if docker ps -a --format '{{.Names}}' | grep -w "$BACKEND_CONTAINER_NAME" > /dev/null; then
+              echo "Stopping and removing existing container..."
               docker stop "$BACKEND_CONTAINER_NAME"
               docker rm -f "$BACKEND_CONTAINER_NAME"
             else
-              echo "No container named '$BACKEND_CONTAINER_NAME' found."
+              echo "No existing container found. Proceeding..."
             fi
 
             echo "Ensuring Docker network '$NETWORK_NAME' exists..."
             docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
 
-            echo "Starting new backend container..."
+            echo "Starting new backend container with volume mounted..."
             docker run -d \
               --name "$BACKEND_CONTAINER_NAME" \
+              --network "$NETWORK_NAME" \
               -p 8085:8085 \
               -v /home/admin/designmyday/uploads:/uploads \
               "$BACKEND_IMAGE_NAME:$IMAGE_TAG"
 
-
-            echo "✅ Backend container restarted with new image."
+            echo "✅ Backend container is running with new image and mounted volume."
