@@ -51,11 +51,11 @@ jobs:
             echo "Pulling frontend image..."
             docker pull "$IMAGE_NAME:$IMAGE_TAG"
 
-            if [ "$(docker ps -a -q -f name="^${CONTAINER_NAME}$")" ]; then
+            if [ "$(docker ps -a -q -f name="^${FRONTEND_CONTAINER_NAME}$")" ]; then
             
               echo "Stopping and removing old container..."
-              docker stop "$CONTAINER_NAME" || true
-              docker rm -f "$CONTAINER_NAME" || true
+              docker stop "$FRONTEND_CONTAINER_NAME" || true
+              docker rm -f "$FRONTEND_CONTAINER_NAME" || true
             else
               echo "No existing container named '$CONTAINER_NAME'. Skipping removal."
             fi
