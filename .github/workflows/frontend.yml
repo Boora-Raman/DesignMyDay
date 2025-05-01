@@ -51,9 +51,15 @@ jobs:
             echo "Pulling frontend image..."
             docker pull "$IMAGE_NAME:$IMAGE_TAG"
 
-            echo "Stopping and removing old container..."
-            docker stop "$CONTAINER_NAME" || true
-            docker rm -f "$CONTAINER_NAME" || true
+            if [ "$(docker ps -a -q -f name="^${CONTAINER_NAME}$")" ]; then
+            
+              echo "Stopping and removing old container..."
+              docker stop "$CONTAINER_NAME" || true
+              docker rm -f "$CONTAINER_NAME" || true
+            else
+              echo "No existing container named '$CONTAINER_NAME'. Skipping removal."
+            fi
+            
 
             # echo "Creating Docker network if not exists..."
             # docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
