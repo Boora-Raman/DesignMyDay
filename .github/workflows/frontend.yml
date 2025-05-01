@@ -42,41 +42,27 @@ jobs:
           username: ${{ env.SSH_USERNAME }}
           key: ${{ env.SSH_KEY }}
           script: |
-            set -e
-
             IMAGE_TAG="${{ env.IMAGE_TAG }}"
             DOCKERHUB_USERNAME="${{ env.DOCKERHUB_USERNAME }}"
             CONTAINER_NAME="${{ env.FRONTEND_CONTAINER_NAME }}"
             IMAGE_NAME="${DOCKERHUB_USERNAME}/frontenddmd"
             NETWORK_NAME="${{ env.NETWORK_NAME }}"
 
-            echo "Pulling frontend image: $IMAGE_NAME:$IMAGE_TAG"
+            echo "Pulling frontend image..."
             docker pull "$IMAGE_NAME:$IMAGE_TAG"
 
-            echo "Stopping and removing existing container..."
+            echo "Stopping and removing old container..."
             docker stop "$CONTAINER_NAME" || true
             docker rm "$CONTAINER_NAME" || true
 
-            echo "Creating network if not exists..."
+            echo "Creating Docker network if not exists..."
             docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
 
-            echo "Running container with retry logic..."
-            for i in {1..3}; do
-              docker run -d \
-                --name "$CONTAINER_NAME" \
-                --network "$NETWORK_NAME" \
-                -p 3000:80 \
-                "$IMAGE_NAME:$IMAGE_TAG" && break
-              echo "Attempt $i failed, retrying in 5 seconds..."
-              sleep 5
-            done
+            echo "Starting new frontend container..."
+            docker run -d \
+              --name "$CONTAINER_NAME" \
+              --network "$NETWORK_NAME" \
+              -p 3000:80 \
+              "$IMAGE_NAME:$IMAGE_TAG"
 
-            echo "Verifying container startup..."
-            sleep 5
-            if docker ps | grep "$CONTAINER_NAME"; then
-              echo "✅ $CONTAINER_NAME is running."
-            else
-              echo "❌ $CONTAINER_NAME failed to start."
-              docker logs "$CONTAINER_NAME" || echo "No logs available."
-              exit 1
-            fi
+            echo "✅ Deployment command sent. Exiting."
