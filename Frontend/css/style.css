@@ -18,7 +18,7 @@ body {
     font-family: 'Poppins', sans-serif;
     line-height: 1.6;
     color: var(--text-color);
-    min-width: 320px; /* Minimum page width for small screens */
+    min-width: 320px;
 }
 
 h1, h2, h3, h4 {
@@ -29,7 +29,7 @@ h1, h2, h3, h4 {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-    min-width: 300px; /* Minimum container width */
+    min-width: 300px;
 }
 
 /* Header Styles */
@@ -40,7 +40,7 @@ header {
     width: 100%;
     top: 0;
     z-index: 1000;
-    min-width: 320px; /* Minimum header width */
+    min-width: 320px;
 }
 
 nav {
@@ -48,7 +48,7 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 2rem;
-    min-height: 60px; /* Minimum nav height */
+    min-height: 60px;
 }
 
 .logo h1 {
@@ -150,7 +150,7 @@ nav {
     border: none;
     cursor: pointer;
     font-size: 1rem;
-    min-width: 120px; /* Minimum button width */
+    min-width: 120px;
 }
 
 .cta-button:hover {
@@ -162,12 +162,28 @@ nav {
     transform: scale(0.95);
 }
 
+.cta-button.secondary {
+    background-color: #6c757d;
+}
+
+.cta-button.secondary:hover {
+    background-color: #5a6268;
+}
+
 .danger-button {
     background-color: #dc3545;
 }
 
 .danger-button:hover {
     background-color: #c82333;
+}
+
+.success {
+    background-color: #28a745;
+}
+
+.success:hover {
+    background-color: #218838;
 }
 
 /* Search Section */
@@ -196,7 +212,7 @@ nav {
     font-size: 1rem;
     background-color: var(--white);
     transition: box-shadow 0.3s ease;
-    min-width: 200px; /* Minimum input width */
+    min-width: 200px;
 }
 
 .search-input:focus {
@@ -353,7 +369,7 @@ nav {
 }
 
 /* Vendors, Caterers, and Venues Sections */
-.v | vendors-section,
+.vendors-section,
 .caterers-section,
 .venues-section {
     padding: 5rem 0;
@@ -429,8 +445,10 @@ nav {
 
 .vendor-specialties,
 .caterer-specialties,
+.venue-specialties,
 .vendor-description,
-.caterer-description {
+.caterer-description,
+.venue-description {
     background-color: var(--light-bg);
     padding: 1rem;
     border-radius: 5px;
@@ -439,24 +457,29 @@ nav {
 
 .vendor-specialties h4,
 .caterer-specialties h4,
+.venue-specialties h4,
 .vendor-description h4,
-.caterer-description h4 {
+.caterer-description h4,
+.venue-description h4 {
     margin-bottom: 0.5rem;
 }
 
 .vendor-specialties ul,
-.caterer-specialties ul {
+.caterer-specialties ul,
+.venue-specialties ul {
     list-style: none;
 }
 
 .vendor-specialties li,
-.caterer-specialties li {
+.caterer-specialties li,
+.venue-specialties li {
     padding: 0.5rem 0;
     border-bottom: 1px solid #e0e0e0;
 }
 
 .vendor-specialties li:last-child,
-.caterer-specialties li:last-child {
+.caterer-specialties li:last-child,
+.venue-specialties li:last-child {
     border-bottom: none;
 }
 
@@ -533,31 +556,55 @@ nav {
     height: 100%;
     background-color: rgba(0,0,0,0.5);
     overflow: auto;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show {
+    display: flex;
 }
 
 .modal-content {
     background-color: var(--white);
-    margin: 15% auto;
+    margin: 10% auto;
     padding: 2rem;
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     width: 90%;
-    max-width: 500px;
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
     position: relative;
 }
 
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
     cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
-.close:hover,
-.close:focus {
-    color: var(--text-color);
-    text-decoration: none;
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.modal-body {
+    margin-bottom: 20px;
+}
+
+.modal-footer {
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
 }
 
 .modal-note {
@@ -595,6 +642,11 @@ nav {
     border-radius: 5px;
     text-align: center;
     margin-top: 2rem;
+}
+
+.error-container.alert {
+    padding: 10px;
+    margin-bottom: 20px;
 }
 
 /* About Section */
@@ -783,6 +835,44 @@ footer {
     border-top: 1px solid rgba(255,255,255,0.1);
 }
 
+/* Booking Modal Specific Styles */
+.list-group {
+    list-style: none;
+    padding: 0;
+}
+
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    background-color: var(--primary-color);
+    height: 20px;
+    border-radius: 4px;
+    transition: width 0.3s;
+    text-align: center;
+    color: var(--white);
+}
+
+#booking-progress {
+    background-color: #f3f3f3;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.alert-info {
+    color: #0c5460;
+    background: #d1ecf1;
+    padding: 10px;
+    border-radius: 4px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .nav-links {
@@ -898,6 +988,12 @@ footer {
 
     .contact-content {
         grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        margin: 5% auto;
     }
 }
 
