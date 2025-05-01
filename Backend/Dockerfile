@@ -1,4 +1,4 @@
-# Use Maven + JDK image as build stage
+# Use Maven + JDK image as build stage 
 FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
 # Set working directory
