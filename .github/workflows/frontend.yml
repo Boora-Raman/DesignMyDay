@@ -53,10 +53,10 @@ jobs:
 
             echo "Stopping and removing old container..."
             docker stop "$CONTAINER_NAME" || true
-            docker rm "$CONTAINER_NAME" || true
+            docker rm -f "$CONTAINER_NAME" || true
 
-            echo "Creating Docker network if not exists..."
-            docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
+            # echo "Creating Docker network if not exists..."
+            # docker network inspect "$NETWORK_NAME" >/dev/null 2>&1 || docker network create "$NETWORK_NAME"
 
             echo "Starting new frontend container..."
             docker run -d \
