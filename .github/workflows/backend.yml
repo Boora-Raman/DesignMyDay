@@ -12,7 +12,6 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
   BACKEND_CONTAINER_NAME: backend
-  NETWORK_NAME: app_network
   SSH_HOST: ${{ secrets.SSH_HOST }}
   SSH_USERNAME: ${{ secrets.SSH_USER }}
   SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -67,7 +66,6 @@ jobs:
             echo "Starting new backend container..."
             docker run -d \
               --name "$BACKEND_CONTAINER_NAME" \
-              --network "$NETWORK_NAME" \
               -p 8085:8085 \
               "$BACKEND_IMAGE_NAME:$IMAGE_TAG"
 
