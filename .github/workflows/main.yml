@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'Development/Backend/**'
+      - 'Backend/**'
 
 env:
   IMAGE_TAG: ${{ github.sha }}
@@ -33,7 +33,7 @@ jobs:
       - name: Build and Push Backend Docker Image
         run: |
           IMAGE_NAME=${{ env.DOCKERHUB_USERNAME }}/backenddmd
-          cd Development/Backend
+          cd Backend
           docker build -t $IMAGE_NAME:${{ env.IMAGE_TAG }} .
           docker push $IMAGE_NAME:${{ env.IMAGE_TAG }}
 
