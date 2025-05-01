@@ -1,14 +1,14 @@
-# Use Maven + JDK image as build stage 
+# Use Maven + JDK image as build stage
 FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
 # Set working directory
 WORKDIR /build
- 
+
 # Copy all project files into the container
 COPY . .
 
 # Build the application using Maven
-RUN mvn clean package -DskipTests
+RUN mvn clean install
 
 # Use a smaller image for running the app
 FROM eclipse-temurin:17-jdk-alpine
