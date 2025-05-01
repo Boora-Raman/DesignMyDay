@@ -28,14 +28,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Log in to Docker Hub
-        run: echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+        run: echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Build and Push Backend Docker Image
         run: |
-          IMAGE_NAME=${DOCKERHUB_USERNAME}/backenddmd
+          IMAGE_NAME=${{ env.DOCKERHUB_USERNAME }}/backenddmd
           cd Development/Backend
-          docker build -t $IMAGE_NAME:${IMAGE_TAG} .
-          docker push $IMAGE_NAME:${IMAGE_TAG}
+          docker build -t $IMAGE_NAME:${{ env.IMAGE_TAG }} .
+          docker push $IMAGE_NAME:${{ env.IMAGE_TAG }}
 
       - name: Deploy to Remote Server via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -44,24 +44,64 @@ jobs:
           username: ${{ env.SSH_USERNAME }}
           key: ${{ env.SSH_KEY }}
           script: |
-            BACKEND_IMAGE_NAME=${DOCKERHUB_USERNAME}/backenddmd
-            FRONTEND_IMAGE_NAME=${DOCKERHUB_USERNAME}/frontenddmd
-            
-            docker pull $BACKEND_IMAGE_NAME:${IMAGE_TAG}
-            docker pull $FRONTEND_IMAGE_NAME:${IMAGE_TAG} || true
+            # Define variables within the script
+            IMAGE_TAG=${{ env.IMAGE_TAG }}
+            BACKEND_IMAGE_NAME=${{ env.DOCKERHUB_USERNAME }}/backenddmd
+            FRONTEND_IMAGE_NAME=${{ env.DOCKERHUB_USERNAME }}/frontenddmd
+            BACKEND_CONTAINER_NAME=${{ env.BACKEND_CONTAINER_NAME }}
+            FRONTEND_CONTAINER_NAME=${{ env.FRONTEND_CONTAINER_NAME }}
+            NETWORK_NAME=${{ env.NETWORK_NAME }}
 
+            # Pull the images
+            docker pull $BACKEND_IMAGE_NAME:$IMAGE_TAG
+            docker pull $FRONTEND_IMAGE_NAME:$IMAGE_TAG || true
+
+            # Stop and remove all containers
             docker ps -aq | xargs -r docker stop || true
             docker ps -aq | xargs -r docker rm || true
 
+            # Create the network if it doesn't exist
+            docker network create $NETWORK_NAME || true
+
+            # Start the backend container
             docker run -d \
               --name $BACKEND_CONTAINER_NAME \
               --network $NETWORK_NAME \
               -p 8085:8085 \
-              $BACKEND_IMAGE_NAME:${IMAGE_TAG}
+              $BACKEND_IMAGE_NAME:$IMAGE_TAG
 
+            # Wait for the backend to be healthy (assumes backend exposes a health endpoint)
+            for i in {1..5}; do
+              if curl -f http://localhost:8085/ || [ $? -eq 7 ]; then
+                echo "Backend is up after $i attempts"
+                break
+              fi
+              echo "Waiting for backend to be ready... Attempt $i"
+              sleep 5
+              if [ $i -eq 5 ]; then
+                echo "Backend failed to start after 5 attempts"
+                docker logs $BACKEND_CONTAINER_NAME
+                exit 1
+              fi
+            done
+
+            # Start the frontend container
             docker run -d \
               --name $FRONTEND_CONTAINER_NAME \
               --network $NETWORK_NAME \
               -p 3000:80 \
-              $FRONTEND_IMAGE_NAME:${IMAGE_TAG}
+              $FRONTEND_IMAGE_NAME:$IMAGE_TAG
+
+            # Wait briefly to allow frontend to start
+            sleep 5
+
+            # Check if both containers are running
+            if docker ps | grep $BACKEND_CONTAINER_NAME && docker ps | grep $FRONTEND_CONTAINER_NAME; then
+              echo "Both containers are running"
+            else
+              echo "One or both containers failed to start"
+              docker logs $BACKEND_CONTAINER_NAME
+              docker logs $FRONTEND_CONTAINER_NAME
+              exit 1
+            fi
 ```
