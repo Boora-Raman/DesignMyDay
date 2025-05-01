@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const decoded = decodeJWT(token);
             if (!decoded?.sub) throw new Error('Invalid token: user ID not found.');
             const response = await axios.get(`${API_BASE_URL}/venues${query ? `?name=${encodeURIComponent(query)}` : ''}`, {
-                headers: { Authorization: `Bearer ${token}` },
+                // headers: { Authorization: `Bearer ${token}` },
             });
             const venues = response.data;
             if (!Array.isArray(venues)) throw new Error('Invalid response format from venues endpoint.');
@@ -114,16 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <h3>${venue.venueName || 'Unknown'}</h3>
                                 <p><strong>Address:</strong> ${venue.venueAddress || 'N/A'}</p>
                                 <p><strong>Price:</strong> ₹${venue.venuePrice ? parseFloat(venue.venuePrice).toFixed(2) : 'N/A'}</p>
-                                <div class="venue-specialties">
-                                    <h4>Specialties</h4>
-                                    <ul>
-                                        ${venue.venueSpecialties && venue.venueSpecialties.length > 0 ? venue.venueSpecialties.map(specialty => `<li>${specialty}</li>`).join('') : '<li>None</li>'}
-                                    </ul>
-                                </div>
-                                <div class="venue-description">
-                                    <h4>Description</h4>
-                                    <p>${venue.description || 'No description available.'}</p>
-                                </div>
                                 <div class="venue-actions">
                                     <button class="cta-button vr-button" data-venue-id="${venue.venueId}"><i class="fas fa-vr-cardboard"></i> Show in VR</button>
                                     <button class="cta-button book-button" data-venue-id="${venue.venueId}" data-venue-name="${venue.venueName}" data-venue-price="${venue.venuePrice || 'N/A'}"><i class="fas fa-book"></i> Book Venue</button>
@@ -175,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const token = sessionStorage.getItem('jwt');
             if (!token) throw new Error('You must be logged in to fetch carters.');
             const response = await axios.get(`${API_BASE_URL}/carters`, {
-                headers: { Authorization: `Bearer ${token}` },
+                // headers: { Authorization: `Bearer ${token}` },
             });
             if (!Array.isArray(response.data)) throw new Error('Invalid response format from carters endpoint.');
             carters = response.data.filter(c => c.carterId && c.carterName);
@@ -198,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const token = sessionStorage.getItem('jwt');
             if (!token) throw new Error('You must be logged in to fetch vendors.');
             const response = await axios.get(`${API_BASE_URL}/vendors`, {
-                headers: { Authorization: `Bearer ${token}` },
+                // headers: { Authorization: `Bearer ${token}` },
             });
             if (!Array.isArray(response.data)) throw new Error('Invalid response format from vendors endpoint.');
             vendors = response.data.filter(v => v.vendorId && v.vendorName);

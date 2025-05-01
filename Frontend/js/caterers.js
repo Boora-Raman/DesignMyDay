@@ -36,12 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
             caterersList.innerHTML = '';
 
             const token = sessionStorage.getItem('jwt');
-            if (!token) {
-                throw new Error('You must be logged in to view caterers.');
-            }
+            // if (!token) {
+            //     throw new Error('You must be logged in to view caterers.');
+            // }
 
             const response = await axios.get(`${API_BASE_URL}/carters${query ? `?name=${encodeURIComponent(query)}` : ''}`, {
-                headers: { Authorization: `Bearer ${token}` },
+                // headers: { Authorization: `Bearer ${token}` },
             });
 
             const caterers = response.data;
