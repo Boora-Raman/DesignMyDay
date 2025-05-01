@@ -1,3 +1,4 @@
+```yaml
 name: Frontend CI/CD
 
 on:
@@ -9,13 +10,13 @@ on:
 
 env:
   IMAGE_TAG: ${{ github.sha }}
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}  # Fixed to match screenshot
-  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}  # Fixed to match screenshot
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
   CONTAINER_NAME: frontend_container
   NETWORK_NAME: app_network
   SSH_HOST: ${{ secrets.SSH_HOST }}
-  SSH_USERNAME: ${{ secrets.SSH_USER }}  # Fixed to match SSH_USER in screenshot
-  SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Fixed to match SSH_PRIVATE_KEY in screenshot
+  SSH_USERNAME: ${{ secrets.SSH_USER }}
+  SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
 jobs:
   build-and-deploy:
@@ -30,7 +31,7 @@ jobs:
 
       - name: Build and Push Frontend Docker Image
         run: |
-          IMAGE_NAME=${DOCKERHUB_USERNAME}/frontend-designmyday/frontenddmd
+          IMAGE_NAME=${DOCKERHUB_USERNAME}/frontenddmd
           cd Frontend
           docker build -t $IMAGE_NAME:${IMAGE_TAG} .
           docker push $IMAGE_NAME:${IMAGE_TAG}
@@ -42,7 +43,7 @@ jobs:
           username: ${{ env.SSH_USERNAME }}
           key: ${{ env.SSH_KEY }}
           script: |
-            IMAGE_NAME=${DOCKERHUB_USERNAME}/frontend-designmyday/frontenddmd
+            IMAGE_NAME=${DOCKERHUB_USERNAME}/frontenddmd
             docker pull $IMAGE_NAME:${IMAGE_TAG}
             
             docker stop $CONTAINER_NAME || true
@@ -53,3 +54,4 @@ jobs:
               --network $NETWORK_NAME \
               -p 3000:80 \
               $IMAGE_NAME:${IMAGE_TAG}
+```
