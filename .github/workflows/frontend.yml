@@ -12,7 +12,6 @@ env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
   FRONTEND_CONTAINER_NAME: frontend_container
-  NETWORK_NAME: app_network
   SSH_HOST: ${{ secrets.SSH_HOST }}
   SSH_USERNAME: ${{ secrets.SSH_USER }}
   SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
