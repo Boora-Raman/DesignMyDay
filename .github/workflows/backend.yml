@@ -7,6 +7,12 @@ on:
     paths:
       - 'Backend/**'
 
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Backend/**'
+
 env:
   IMAGE_TAG: ${{ github.sha }}
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
